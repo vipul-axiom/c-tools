@@ -1,28 +1,21 @@
 # c-tools
 
-A small C program that reads numbers and prints the count, min, max, average, and a sorted copy.
+Two small C programs.
 
-## Build
+## stats
+
+Reads numbers and prints the count, min, max, average, and a sorted copy.
 
 ```
 gcc -std=c11 -Wall -Wextra -o stats main.c
+printf '3\n1\n2\n' | ./stats
 ```
 
-## Run
+## tally
+
+Counts lines, words, and characters from text on standard input.
 
 ```
-./stats
-```
-
-Type one number per line, then press Ctrl-D (or Ctrl-Z on Windows).
-
-Example:
-
-```
-$ printf '3\n1\n2\n' | ./stats
-count:   3
-min:     1.0000
-max:     3.0000
-average: 2.0000
-sorted: 1.0000 2.0000 3.0000
+gcc -std=c11 -Wall -Wextra -o tally tally.c
+printf 'hello world\n' | ./tally
 ```

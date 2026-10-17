@@ -12,7 +12,7 @@ int main(void) {
     size_t n = 0, cap = 0;
     double x;
 
-    printf("Enter numbers, one per line. Empty line to finish.\n");
+    fprintf(stderr, "Enter numbers separated by spaces or newlines. Press Ctrl-D to finish.\n");
     while (scanf("%lf", &x) == 1) {
         if (n == cap) {
             cap = cap ? cap * 2 : 8;

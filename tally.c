@@ -3,6 +3,8 @@
 
 int main(void) {
     int c, lines = 0, words = 0, chars = 0, in_word = 0;
+
+    fprintf(stderr, "Type or paste text. Press Ctrl-D to finish.\n");
     while ((c = getchar()) != EOF) {
         chars++;
         if (c == '\n') lines++;

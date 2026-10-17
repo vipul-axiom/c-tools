@@ -34,6 +34,24 @@ Source: `tally.c`
 printf 'hello world\n' | ./tally
 ```
 
+## wordfreq
+
+Counts how often each word appears in text on standard input and prints
+the words from most to least frequent (ties in alphabetical order).
+Words are made of letters, digits, and apostrophes, and are compared
+case-insensitively. Source: `wordfreq.c`
+
+```
+$ printf 'the cat saw the dog\nThe dog ran\n' | ./wordfreq
+      3 the
+      2 dog
+      1 cat
+      1 ran
+      1 saw
+```
+
+You can also count a whole file: `./wordfreq < notes.txt`
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

@@ -33,3 +33,7 @@ Source: `tally.c`
 ```
 printf 'hello world\n' | ./tally
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -23,7 +23,12 @@ Reads numbers and prints the count, min, max, average, and a sorted copy.
 Source: `stats.c`
 
 ```
-printf '3\n1\n2\n' | ./stats
+$ printf '3\n1\n2\n' | ./stats
+count:   3
+min:     1.0000
+max:     3.0000
+average: 2.0000
+sorted: 1.0000 2.0000 3.0000
 ```
 
 ## tally
@@ -32,7 +37,10 @@ Counts lines, words, and characters from text on standard input.
 Source: `tally.c`
 
 ```
-printf 'hello world\n' | ./tally
+$ printf 'hello world\n' | ./tally
+lines: 1
+words: 2
+chars: 12
 ```
 
 ## wordfreq

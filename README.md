@@ -9,6 +9,7 @@ You need a C compiler (`cc`/`gcc`/`clang`) and `make`.
 ```
 make          # builds all tools
 make stats    # builds just one tool
+make test     # builds, then checks each tool against tests/
 make clean    # removes the built binaries
 ```
 

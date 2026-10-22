@@ -1,3 +1,5 @@
+[![CI](https://github.com/vipul-axiom/c-tools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vipul-axiom/c-tools/actions/workflows/ci.yml)
+
 # c-tools
 
 Small C command-line tools.

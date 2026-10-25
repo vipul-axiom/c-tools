@@ -1,4 +1,7 @@
-/* wordfreq: count how often each word appears in text from stdin.
+/* wordfreq: count how often each word appears in text.
+ *
+ * Usage: wordfreq [FILE]
+ * Reads FILE, or standard input when no FILE (or "-") is given.
  *
  * A word is a run of letters, digits, and apostrophes. Words are
  * lowercased, so "The" and "the" count as the same word. Apostrophes at
@@ -8,6 +11,7 @@
  * alphabetically.
  */
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,15 +74,49 @@ static void free_all(char *buf) {
     free(buf);
 }
 
-int main(void) {
+static void usage(FILE *out) {
+    fprintf(out, "Usage: wordfreq [FILE]\n");
+    fprintf(out, "Count how often each word appears in FILE (or standard input),\n");
+    fprintf(out, "most frequent first.\n");
+    fprintf(out, "  -h, --help  show this help and exit\n");
+}
+
+int main(int argc, char *argv[]) {
+    const char *path = NULL;   /* file name from the command line, if any */
+    FILE *in = stdin;          /* where we read from: stdin or the file */
     char *buf = NULL;          /* current word being read */
     size_t len = 0, cap = 0;
     int c;
 
-    fprintf(stderr, "Type or paste text. Press Ctrl-D to finish.\n");
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+            usage(stdout);
+            return 0;
+        } else if (argv[i][0] == '-' && argv[i][1] != '\0') {
+            fprintf(stderr, "wordfreq: unknown option '%s'\n", argv[i]);
+            usage(stderr);
+            return 1;
+        } else if (path != NULL) {
+            fprintf(stderr, "wordfreq: only one file can be given\n");
+            usage(stderr);
+            return 1;
+        } else {
+            path = argv[i];
+        }
+    }
+
+    if (path != NULL && strcmp(path, "-") != 0) {
+        in = fopen(path, "r");
+        if (in == NULL) {
+            fprintf(stderr, "wordfreq: %s: %s\n", path, strerror(errno));
+            return 1;
+        }
+    } else {
+        fprintf(stderr, "Type or paste text. Press Ctrl-D to finish.\n");
+    }
 
     do {
-        c = getchar();
+        c = getc(in);
         if (c != EOF && is_word_char(c)) {
             if (len + 1 >= cap) {  /* leave room for the '\0' */
                 size_t new_cap = cap ? cap * 2 : 32;
@@ -86,6 +124,7 @@ int main(void) {
                 if (!next) {
                     fprintf(stderr, "out of memory\n");
                     free_all(buf);
+                    if (in != stdin) fclose(in);
                     return 1;
                 }
                 buf = next;
@@ -104,11 +143,13 @@ int main(void) {
             if (*start != '\0' && add_word(start) != 0) {
                 fprintf(stderr, "out of memory\n");
                 free_all(buf);
+                if (in != stdin) fclose(in);
                 return 1;
             }
             len = 0;
         }
     } while (c != EOF);
+    if (in != stdin) fclose(in);
 
     qsort(entries, n_entries, sizeof *entries, cmp_entry);
     for (size_t i = 0; i < n_entries; i++) {

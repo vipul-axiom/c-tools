@@ -118,3 +118,13 @@ Type or paste text. Press Ctrl-D to finish.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## What I learned
+
+- Reading input from either stdin or a file with the same code.
+- Writing a Makefile with a test target and running it on every push with GitHub Actions.
+- Checking program output against expected files to catch mistakes.
+
+## Next up
+
+- More edge-case tests (empty input, very long lines).

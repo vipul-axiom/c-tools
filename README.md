@@ -11,7 +11,7 @@ You need a C compiler (`cc`/`gcc`/`clang`) and `make`.
 ```
 make          # builds all tools
 make stats    # builds just one tool
-make test     # builds, then checks each tool against tests/
+make test     # builds, then runs the checks (tests/ files plus edge cases)
 make clean    # removes the built binaries
 ```
 
@@ -31,15 +31,21 @@ standard error. When typing input by hand, press Ctrl-D on a new line to
 finish. Because the prompt goes to standard error, piped or redirected
 output stays clean.
 
-If the file can't be opened, the tool prints an error and exits with
-status 1:
+If the file can't be opened or read (for example, it is missing,
+unreadable, or a directory), the tool prints an error, prints no counts,
+and exits with status 1:
 
 ```
 $ ./tally missing.txt
 tally: missing.txt: No such file or directory
 $ echo $?
 1
+$ ./tally /etc
+tally: /etc: Is a directory
 ```
+
+Empty input is not an error: `stats` prints `No numbers entered.`,
+`tally` prints zero counts, and `wordfreq` prints nothing. All exit 0.
 
 Help:
 

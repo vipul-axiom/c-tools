@@ -115,6 +115,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Type or paste text. Press Ctrl-D to finish.\n");
     }
 
+    errno = 0;  /* so a read error below reports its own cause */
     do {
         c = getc(in);
         if (c != EOF && is_word_char(c)) {
@@ -149,6 +150,16 @@ int main(int argc, char *argv[]) {
             len = 0;
         }
     } while (c != EOF);
+    /* EOF can also mean a read error (for example, FILE is a directory).
+     * Report it instead of printing counts for partial input. */
+    if (ferror(in)) {
+        int err = errno;
+        fprintf(stderr, "wordfreq: %s: %s\n", path != NULL ? path : "-",
+                err ? strerror(err) : "read error");
+        free_all(buf);
+        if (in != stdin) fclose(in);
+        return 1;
+    }
     if (in != stdin) fclose(in);
 
     qsort(entries, n_entries, sizeof *entries, cmp_entry);

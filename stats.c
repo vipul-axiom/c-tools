@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Enter numbers separated by spaces or newlines. Press Ctrl-D to finish.\n");
     }
 
+    errno = 0;  /* so a read error below reports its own cause */
     while (fscanf(in, "%lf", &x) == 1) {
         if (n == cap) {
             cap = cap ? cap * 2 : 8;
@@ -69,6 +70,16 @@ int main(int argc, char *argv[]) {
             nums = next;
         }
         nums[n++] = x;
+    }
+    /* EOF can also mean a read error (for example, FILE is a directory).
+     * Report it instead of printing counts for partial input. */
+    if (ferror(in)) {
+        int err = errno;
+        fprintf(stderr, "stats: %s: %s\n", path != NULL ? path : "-",
+                err ? strerror(err) : "read error");
+        free(nums);
+        if (in != stdin) fclose(in);
+        return 1;
     }
     if (in != stdin) fclose(in);
 

@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Type or paste text. Press Ctrl-D to finish.\n");
     }
 
+    errno = 0;  /* so a read error below reports its own cause */
     while ((c = getc(in)) != EOF) {
         chars++;
         if (c == '\n') lines++;
@@ -54,6 +55,15 @@ int main(int argc, char *argv[]) {
             in_word = 1;
             words++;
         }
+    }
+    /* EOF can also mean a read error (for example, FILE is a directory).
+     * Report it instead of printing counts for partial input. */
+    if (ferror(in)) {
+        int err = errno;
+        fprintf(stderr, "tally: %s: %s\n", path != NULL ? path : "-",
+                err ? strerror(err) : "read error");
+        if (in != stdin) fclose(in);
+        return 1;
     }
     if (in != stdin) fclose(in);
 

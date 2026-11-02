@@ -133,4 +133,4 @@ MIT. See [LICENSE](LICENSE).
 
 ## Next up
 
-- More edge-case tests (empty input, very long lines).
+- Add a -n N option to wordfreq to show only the top N words.

@@ -102,7 +102,8 @@ chars: 12
 Counts how often each word appears in a file or standard input and prints
 the words from most to least frequent (ties in alphabetical order).
 Words are made of letters, digits, and apostrophes, and are compared
-case-insensitively. Source: `wordfreq.c`
+case-insensitively. Pass `-n N` to show only the top N words.
+Source: `wordfreq.c`
 
 ```
 $ printf 'the cat saw the dog\nThe dog ran\n' > notes.txt
@@ -112,6 +113,9 @@ $ ./wordfreq notes.txt
       1 cat
       1 ran
       1 saw
+$ ./wordfreq -n 2 notes.txt
+      3 the
+      2 dog
 $ printf 'the cat saw the dog\nThe dog ran\n' | ./wordfreq
 Type or paste text. Press Ctrl-D to finish.
       3 the
@@ -119,6 +123,12 @@ Type or paste text. Press Ctrl-D to finish.
       1 cat
       1 ran
       1 saw
+$ ./wordfreq --help
+Usage: wordfreq [-n N] [FILE]
+Count how often each word appears in FILE (or standard input),
+most frequent first.
+  -n N        show only the top N words
+  -h, --help  show this help and exit
 ```
 
 ## License
@@ -133,4 +143,4 @@ MIT. See [LICENSE](LICENSE).
 
 ## Next up
 
-- Add a -n N option to wordfreq to show only the top N words.
+- Make tally count with a wider type so huge inputs do not overflow.

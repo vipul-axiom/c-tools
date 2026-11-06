@@ -1,6 +1,6 @@
 /* wordfreq: count how often each word appears in text.
  *
- * Usage: wordfreq [FILE]
+ * Usage: wordfreq [-n N] [FILE]
  * Reads FILE, or standard input when no FILE (or "-") is given.
  *
  * A word is a run of letters, digits, and apostrophes. Words are
@@ -8,7 +8,7 @@
  * the start or end of a word are dropped, so 'quoted' becomes quoted.
  *
  * Output: one line per word, most frequent first; ties are sorted
- * alphabetically.
+ * alphabetically. With -n N, only the top N words are printed.
  */
 #include <ctype.h>
 #include <errno.h>
@@ -75,10 +75,28 @@ static void free_all(char *buf) {
 }
 
 static void usage(FILE *out) {
-    fprintf(out, "Usage: wordfreq [FILE]\n");
+    fprintf(out, "Usage: wordfreq [-n N] [FILE]\n");
     fprintf(out, "Count how often each word appears in FILE (or standard input),\n");
     fprintf(out, "most frequent first.\n");
+    fprintf(out, "  -n N        show only the top N words\n");
     fprintf(out, "  -h, --help  show this help and exit\n");
+}
+
+/* Parse a positive decimal integer from s into *out.
+ * Returns 0 on success, -1 if empty, non-digits, zero, or overflow. */
+static int parse_positive(const char *s, size_t *out) {
+    unsigned long v;
+    char *end;
+
+    if (s == NULL || *s == '\0') return -1;
+    for (const char *p = s; *p; p++) {
+        if (!isdigit((unsigned char)*p)) return -1;
+    }
+    errno = 0;
+    v = strtoul(s, &end, 10);
+    if (errno != 0 || end == s || *end != '\0' || v == 0) return -1;
+    *out = (size_t)v;
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -87,11 +105,26 @@ int main(int argc, char *argv[]) {
     char *buf = NULL;          /* current word being read */
     size_t len = 0, cap = 0;
     int c;
+    int have_limit = 0;        /* 1 if -n N was given */
+    size_t limit = 0;          /* print at most this many lines when set */
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             usage(stdout);
             return 0;
+        } else if (strcmp(argv[i], "-n") == 0) {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "wordfreq: -n requires a positive integer\n");
+                usage(stderr);
+                return 1;
+            }
+            i++;
+            if (parse_positive(argv[i], &limit) != 0) {
+                fprintf(stderr, "wordfreq: invalid -n value '%s'\n", argv[i]);
+                usage(stderr);
+                return 1;
+            }
+            have_limit = 1;
         } else if (argv[i][0] == '-' && argv[i][1] != '\0') {
             fprintf(stderr, "wordfreq: unknown option '%s'\n", argv[i]);
             usage(stderr);
@@ -163,8 +196,12 @@ int main(int argc, char *argv[]) {
     if (in != stdin) fclose(in);
 
     qsort(entries, n_entries, sizeof *entries, cmp_entry);
-    for (size_t i = 0; i < n_entries; i++) {
-        printf("%7zu %s\n", entries[i].count, entries[i].word);
+    {
+        size_t to_print = n_entries;
+        if (have_limit && limit < to_print) to_print = limit;
+        for (size_t i = 0; i < to_print; i++) {
+            printf("%7zu %s\n", entries[i].count, entries[i].word);
+        }
     }
 
     free_all(buf);

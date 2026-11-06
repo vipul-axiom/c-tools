@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -Wall -Wextra -std=c99 -pedantic -O2
+CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic -O2
 
 all: stats tally wordfreq
 
@@ -25,6 +25,7 @@ wordfreq: wordfreq.c
 #      and exits non-zero
 #   9. an unreadable file (chmod 000) prints an error and exits non-zero
 #      (SKIP when running as root, since root can read it anyway)
+# Extra wordfreq checks cover -n N (top N, oversize N, bad args, help).
 # Temporary files go in a directory that is removed at the end.
 test: all
 	@status=0; tmp=$$(mktemp -d); \
@@ -107,6 +108,44 @@ test: all
 			rm -f $$tmp/unreadable; \
 		fi; \
 	done; \
+	printf 'the cat saw the dog\nThe dog ran\n' > $$tmp/topn.in; \
+	printf '      3 the\n      2 dog\n' > $$tmp/topn.expected; \
+	if printf 'the cat saw the dog\nThe dog ran\n' | ./wordfreq -n 2 2>/dev/null | diff -u $$tmp/topn.expected -; then \
+		echo "PASS wordfreq (-n 2 stdin)"; \
+	else \
+		echo "FAIL wordfreq (-n 2 stdin)"; status=1; \
+	fi; \
+	if ./wordfreq -n 2 $$tmp/topn.in 2>/dev/null | diff -u $$tmp/topn.expected -; then \
+		echo "PASS wordfreq (-n 2 file)"; \
+	else \
+		echo "FAIL wordfreq (-n 2 file)"; status=1; \
+	fi; \
+	./wordfreq $$tmp/topn.in 2>/dev/null > $$tmp/all.out; \
+	if ./wordfreq -n 100 $$tmp/topn.in 2>/dev/null | diff -u $$tmp/all.out -; then \
+		echo "PASS wordfreq (-n larger than unique count)"; \
+	else \
+		echo "FAIL wordfreq (-n larger than unique count)"; status=1; \
+	fi; \
+	if ./wordfreq -n > /dev/null 2>&1; then \
+		echo "FAIL wordfreq (-n missing N: exit status was 0)"; status=1; \
+	else \
+		echo "PASS wordfreq (-n missing N)"; \
+	fi; \
+	if ./wordfreq -n abc > /dev/null 2>&1; then \
+		echo "FAIL wordfreq (-n bad N: exit status was 0)"; status=1; \
+	else \
+		echo "PASS wordfreq (-n bad N)"; \
+	fi; \
+	if ./wordfreq -n 0 > /dev/null 2>&1; then \
+		echo "FAIL wordfreq (-n 0: exit status was 0)"; status=1; \
+	else \
+		echo "PASS wordfreq (-n 0)"; \
+	fi; \
+	if ./wordfreq --help 2>/dev/null | grep -q -- '-n'; then \
+		echo "PASS wordfreq (help mentions -n)"; \
+	else \
+		echo "FAIL wordfreq (help mentions -n)"; status=1; \
+	fi; \
 	rm -rf "$$tmp"; \
 	exit $$status
 

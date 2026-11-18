@@ -26,6 +26,7 @@ wordfreq: wordfreq.c
 #   9. an unreadable file (chmod 000) prints an error and exits non-zero
 #      (SKIP when running as root, since root can read it anyway)
 # Extra wordfreq checks cover -n N (top N, oversize N, bad args, help).
+# Extra tally check: several million short lines via a pipe (large counts).
 # Temporary files go in a directory that is removed at the end.
 test: all
 	@status=0; tmp=$$(mktemp -d); \
@@ -145,6 +146,12 @@ test: all
 		echo "PASS wordfreq (help mentions -n)"; \
 	else \
 		echo "FAIL wordfreq (help mentions -n)"; status=1; \
+	fi; \
+	printf 'lines: 2000000\nwords: 2000000\nchars: 4000000\n' > $$tmp/tally-large.expected; \
+	if yes x | head -n 2000000 | ./tally 2>/dev/null | diff -u $$tmp/tally-large.expected -; then \
+		echo "PASS tally (large input)"; \
+	else \
+		echo "FAIL tally (large input)"; status=1; \
 	fi; \
 	rm -rf "$$tmp"; \
 	exit $$status

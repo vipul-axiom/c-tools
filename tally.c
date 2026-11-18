@@ -17,7 +17,8 @@ static void usage(FILE *out) {
 int main(int argc, char *argv[]) {
     const char *path = NULL;   /* file name from the command line, if any */
     FILE *in = stdin;          /* where we read from: stdin or the file */
-    int c, lines = 0, words = 0, chars = 0, in_word = 0;
+    int c, in_word = 0;
+    unsigned long long lines = 0, words = 0, chars = 0;  /* wide counters so large files don't overflow */
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
@@ -67,6 +68,6 @@ int main(int argc, char *argv[]) {
     }
     if (in != stdin) fclose(in);
 
-    printf("lines: %d\nwords: %d\nchars: %d\n", lines, words, chars);
+    printf("lines: %llu\nwords: %llu\nchars: %llu\n", lines, words, chars);
     return 0;
 }

@@ -143,4 +143,4 @@ MIT. See [LICENSE](LICENSE).
 
 ## Next up
 
-- Make tally count with a wider type so huge inputs do not overflow.
+- Add a -c option to tally to print only the character count.
